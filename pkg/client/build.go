@@ -5,6 +5,7 @@ import (
 	"crypto/rand"
 	"encoding/json"
 	"fmt"
+	"net/url"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -861,6 +862,16 @@ func (c *Client) processProxyConfig(config *ProxyConfig) ProxyConfig {
 	}
 	if noProxy, ok = os.LookupEnv("NO_PROXY"); !ok {
 		noProxy = os.Getenv("no_proxy")
+	}
+
+	uri, err := url.Parse(httpProxy)
+	if err != nil {
+		// whatever
+		fmt.Println("couldn't split host/port", err)
+		return ProxyConfig{}
+	}
+	if uri.Hostname() == "127.0.0.1" || uri.Hostname() == "localhost" {
+		return ProxyConfig{}
 	}
 	return ProxyConfig{
 		HTTPProxy:  httpProxy,
